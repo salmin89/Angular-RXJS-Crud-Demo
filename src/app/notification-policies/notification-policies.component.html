@@ -1,0 +1,38 @@
+<div *ngIf="items$ | async as items else loadingTemplate">
+	<input type="text" (keyup)="handleSearch($event)" />
+
+	<div [ngClass]="{ 'loader-pending': loading }" class="loader">
+		<ul>
+			<li *ngFor="let item of items;let i = index" class="item-row"
+				[ngClass]="{'item-selected': selectedItem == item}">
+				<div>{{item}}</div>
+				<button (click)="toggleItemSelect(item)">SELECT</button>
+				<button (click)="editItem(i, item)">EDIT</button>
+				<button (click)="deleteItem(i)">x</button>
+			</li>
+		</ul>
+
+		<hr />
+
+		<button (click)="addNew()">Add new</button>
+
+		<hr />
+
+		pagination: <br />
+
+		<button (click)="prevPage()" [disabled]="getCurrentPage === 0">
+      (Page {{ getCurrentPage ? getCurrentPage : '' }})
+    </button>
+		<button (click)="nextPage()" [disabled]="!hasNextPage">
+      (Page {{ getCurrentPage + 1 }})
+    </button>
+
+		<br />
+
+    {{ total$.value.current }} / {{ total$.value.all }}
+  </div>
+	</div>
+
+	<ng-template #loadingTemplate>
+		loading...
+	</ng-template>

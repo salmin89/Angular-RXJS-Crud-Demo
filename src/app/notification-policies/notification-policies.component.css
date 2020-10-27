@@ -1,0 +1,42 @@
+p {
+  font-family: Lato;
+}
+
+ul {
+  margin-block-start: 0rem;
+  margin-block-end: 0rem;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding-inline-start: 0rem;
+}
+
+li {
+  display: flex;
+  margin: 1rem 0rem;
+}
+
+li > * {
+  margin: 0rem 1rem;
+}
+
+.is-loading {
+  color: red;
+}
+
+.loader {
+  position: relative;
+  transition: ease-in opacity 0.3s;
+  opacity: 1;
+}
+
+.loader-pending {
+  opacity: 0.3;
+}
+
+.item-row {
+  background: lightblue;
+}
+
+.item-selected {
+  background: lightgreen;
+}
