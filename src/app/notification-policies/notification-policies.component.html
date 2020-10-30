@@ -18,7 +18,7 @@
 
 		<hr />
 
-		pagination: <br />
+		pagination ({{getCurrentPage + 1}}): <br />
 
 		<button (click)="prevPage()" [disabled]="getCurrentPage === 0">
       (Page {{ getCurrentPage ? getCurrentPage : '' }})

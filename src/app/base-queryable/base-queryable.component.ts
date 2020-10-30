@@ -30,7 +30,6 @@ export class BaseQueryableComponent {
   searchString$: AnonymousSubject<string> = new BehaviorSubject<string>(
     ""
   ).pipe(
-    debounceTime(300),
     map(searchString => searchString.trim()),
     distinctUntilChanged()
   ) as AnonymousSubject<string>;
@@ -50,8 +49,10 @@ export class BaseQueryableComponent {
     this.paginationOptions$,
     this.reloadItems$
   ]).pipe(
+    debounceTime(300),
     tap(() => (this.loading = true)),
     switchMap(([searchString, paginationOptions]) => {
+      console.log("running");
       return this.queryService.getItems(searchString, paginationOptions);
     }),
     map((res: { data: string[]; total: number }) => {
@@ -78,6 +79,16 @@ export class BaseQueryableComponent {
   }
 
   handleSearch(event) {
+    this.paginationOptions$.next({
+      offset: 0,
+      limit: this.DEFAULT_LIMIT
+    });
+
+    this.total$ = new BehaviorSubject({
+      current: 0,
+      all: 0
+    });
+
     this.searchString$.next(event.target.value);
   }
 
