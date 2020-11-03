@@ -109,6 +109,7 @@ export class FakeApiService {
     searchString,
     { offset, limit }
   ): Promise<{ data: string[]; total: number }> {
+    console.log("FAKE API CALL");
     return new Promise(resolve => {
       setTimeout(() => {
         const itemsSubset =

@@ -20,10 +20,10 @@
 
 		pagination ({{getCurrentPage + 1}}): <br />
 
-		<button (click)="prevPage()" [disabled]="getCurrentPage === 0">
+		<button (click)="prevPage()" [disabled]="getCurrentPage === 0 || loading">
       (Page {{ getCurrentPage ? getCurrentPage : '' }})
     </button>
-		<button (click)="nextPage()" [disabled]="!hasNextPage">
+		<button (click)="nextPage()" [disabled]="!hasNextPage || loading">
       (Page {{ getCurrentPage + 1 }})
     </button>
 

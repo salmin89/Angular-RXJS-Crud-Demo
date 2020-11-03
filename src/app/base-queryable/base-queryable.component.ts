@@ -5,6 +5,7 @@ import {
   debounce,
   debounceTime,
   distinctUntilChanged,
+  distinctUntilKeyChanged,
   map,
   shareReplay,
   switchMap,
@@ -22,17 +23,11 @@ export class BaseQueryableComponent {
   private queryService = new QueryService();
   DEFAULT_LIMIT = 10;
 
-  // loading$ = new BehaviorSubject(true);
   loading = true;
 
   reloadItems$ = new BehaviorSubject(false);
 
-  searchString$: AnonymousSubject<string> = new BehaviorSubject<string>(
-    ""
-  ).pipe(
-    map(searchString => searchString.trim()),
-    distinctUntilChanged()
-  ) as AnonymousSubject<string>;
+  searchString$: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
   paginationOptions$ = new BehaviorSubject<any>({
     offset: 0,
@@ -45,14 +40,19 @@ export class BaseQueryableComponent {
   });
 
   items$: Observable<any[]> = combineLatest([
-    this.searchString$,
-    this.paginationOptions$,
+    this.searchString$.pipe(
+      debounceTime(300),
+      map(searchString => searchString.trim()),
+      distinctUntilChanged()
+    ),
+    this.paginationOptions$.pipe(
+      debounceTime(300),
+      distinctUntilKeyChanged("offset")
+    ),
     this.reloadItems$
   ]).pipe(
-    debounceTime(300),
     tap(() => (this.loading = true)),
     switchMap(([searchString, paginationOptions]) => {
-      console.log("running");
       return this.queryService.getItems(searchString, paginationOptions);
     }),
     map((res: { data: string[]; total: number }) => {
@@ -79,7 +79,8 @@ export class BaseQueryableComponent {
   }
 
   handleSearch(event) {
-    this.paginationOptions$.next({
+   if (event.target.value?.trim()) {
+      this.paginationOptions$.next({
       offset: 0,
       limit: this.DEFAULT_LIMIT
     });
@@ -88,6 +89,7 @@ export class BaseQueryableComponent {
       current: 0,
       all: 0
     });
+   }
 
     this.searchString$.next(event.target.value);
   }
