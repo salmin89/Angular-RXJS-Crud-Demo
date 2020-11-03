@@ -109,7 +109,7 @@ export class FakeApiService {
     searchString,
     { offset, limit }
   ): Promise<{ data: string[]; total: number }> {
-    console.log("FAKE API CALL");
+    console.log("FAKE API CALL -- GET ALL ITEMS");
     return new Promise(resolve => {
       setTimeout(() => {
         const itemsSubset =
@@ -127,6 +127,8 @@ export class FakeApiService {
   }
 
   create(item): Promise<any> {
+    console.log("FAKE API CALL -- CREATE ITEM");
+
     return new Promise(resolve => {
       setTimeout(() => {
         this.names.unshift(item);
@@ -136,6 +138,8 @@ export class FakeApiService {
   }
 
   update(index, itemName): Promise<any> {
+    console.log("FAKE API CALL -- UPDATE ITEM");
+
     return new Promise(resolve => {
       setTimeout(() => {
         this.names[index] = itemName;
@@ -145,12 +149,14 @@ export class FakeApiService {
   }
 
   remove(index): Promise<any> {
+    console.log("FAKE API CALL -- DELETE ITEM");
+
     return new Promise(resolve => {
       setTimeout(() => {
         const itemToRemove = this.names[index];
         this.names.splice(index, 1);
         resolve(itemToRemove);
-      }, 300);
+      }, 600);
     });
   }
 }

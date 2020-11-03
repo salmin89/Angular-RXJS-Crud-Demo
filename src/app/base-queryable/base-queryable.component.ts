@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { BehaviorSubject, combineLatest, from, Observable } from "rxjs";
+import { BehaviorSubject, combineLatest, from, merge,  Observable, zip } from "rxjs";
 import { AnonymousSubject } from "rxjs/internal/Rx";
 import {
   debounce,
@@ -11,13 +11,11 @@ import {
   switchMap,
   tap
 } from "rxjs/operators";
-import { FakeApiService } from "../fake-api.service";
 import { QueryService } from "../query.service";
 
 @Component({
   selector: "app-base-queryable",
-  templateUrl: "./base-queryable.component.html",
-  styleUrls: ["./base-queryable.component.css"]
+  templateUrl: "./base-queryable.component.html"
 })
 export class BaseQueryableComponent {
   private queryService = new QueryService();
@@ -25,11 +23,12 @@ export class BaseQueryableComponent {
 
   loading = true;
 
-reloadItemsDefault = {
+  reloadItemsDefault = {
     create: false,
     update: false,
     destroy: false,
-    item: null,
+    itemIndex: null,
+    itemName: null
   };
 
   reloadItems$ = new BehaviorSubject(this.reloadItemsDefault);
@@ -46,7 +45,7 @@ reloadItemsDefault = {
     all: 0
   });
 
-  items$: Observable<any[]> = combineLatest([
+  requestItems$: Observable<any> = combineLatest([
     this.searchString$.pipe(
       debounceTime(300),
       map(searchString => searchString.trim()),
@@ -56,23 +55,31 @@ reloadItemsDefault = {
       debounceTime(300),
       distinctUntilKeyChanged("offset")
     ),
-    this.reloadItems$
   ]).pipe(
     tap(() => (this.loading = true)),
-    switchMap(([searchString, paginationOptions, reloadItems]) => {
-      return this.queryService.getItems(searchString, paginationOptions);
-    }),
-    map((res: { data: string[]; total: number }) => {
-      this.total$.next({
-        current: res.data.length,
-        all: res.total
-      });
-      this.loading = false;
-
-      return res.data;
+    switchMap(([searchString, paginationOptions]) => {
+      return this.queryService.getItems(searchString, paginationOptions)
     }),
     shareReplay()
   );
+
+  items$ = combineLatest(this.requestItems$, this.reloadItems$).pipe(
+    map(([response,reloadItems]) => {
+      if (reloadItems.itemIndex !== null) {
+        if (reloadItems.destroy) response.data.splice(reloadItems.itemIndex, 1);
+        if (reloadItems.update) response.data[reloadItems.itemIndex] = reloadItems.itemName;
+        this.reloadItems$.next(this.reloadItemsDefault);
+      }
+      this.total$.next({
+        current: response.data.length,
+        all: response.total
+      });
+      this.loading = false;
+
+      return response.data;
+    }),
+    shareReplay()
+  )
 
   selectedItem: any;
 
@@ -126,17 +133,16 @@ reloadItemsDefault = {
 
   // #region CRUD Operations
   editItem(index, itemName) {
-    this.loading = true;
     itemName = prompt("Enter item name", itemName);
 
     if (itemName === null) {
-      this.loading = true;
       return;
     }
+    this.loading = true;
 
     this.queryService
       .update(this.paginationOptions$.value.offset + index, itemName)
-      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, update: true, item}));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, update: true, itemIndex: index, itemName}));
   }
 
   deleteItem(index) {
@@ -144,7 +150,7 @@ reloadItemsDefault = {
 
     this.queryService
       .remove(this.paginationOptions$.value.offset + index)
-      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, destroy: true, item}));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, destroy: true, itemIndex: index}));
   }
 
   addNew() {
@@ -157,7 +163,7 @@ reloadItemsDefault = {
 
     this.queryService
       .create(itemName)
-      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, item}));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, itemIndex: 0}));
   }
   // #endregion
 }
