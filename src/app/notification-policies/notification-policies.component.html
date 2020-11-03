@@ -18,21 +18,23 @@
 
 		<hr />
 
-		pagination ({{getCurrentPage + 1}}): <br />
+		Page ({{getCurrentPage + 1}}): <br />
 
 		<button (click)="prevPage()" [disabled]="getCurrentPage === 0 || loading">
-      (Page {{ getCurrentPage ? getCurrentPage : '' }})
+      Prev Page
     </button>
 		<button (click)="nextPage()" [disabled]="!hasNextPage || loading">
-      (Page {{ getCurrentPage + 1 }})
+      Next Page
     </button>
 
 		<br />
 
-    {{ total$.value.current }} / {{ total$.value.all }}
-  </div>
+		<hr>
+		Total:
+		{{ total$.value.current }} / {{ total$.value.all }}
 	</div>
+</div>
 
-	<ng-template #loadingTemplate>
-		loading...
-	</ng-template>
+<ng-template #loadingTemplate>
+	loading...
+</ng-template>

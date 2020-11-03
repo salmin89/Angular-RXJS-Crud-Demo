@@ -126,29 +126,30 @@ export class FakeApiService {
     });
   }
 
-  create(item): Promise<boolean> {
+  create(item): Promise<any> {
     return new Promise(resolve => {
       setTimeout(() => {
         this.names.unshift(item);
-        resolve(true);
+        resolve(item);
       }, 800);
     });
   }
 
-  update(index, itemName): Promise<boolean> {
+  update(index, itemName): Promise<any> {
     return new Promise(resolve => {
       setTimeout(() => {
         this.names[index] = itemName;
-        resolve(true);
+        resolve(this.names[index]);
       }, 700);
     });
   }
 
-  remove(index): Promise<boolean> {
+  remove(index): Promise<any> {
     return new Promise(resolve => {
       setTimeout(() => {
+        const itemToRemove = this.names[index];
         this.names.splice(index, 1);
-        resolve(true);
+        resolve(itemToRemove);
       }, 300);
     });
   }

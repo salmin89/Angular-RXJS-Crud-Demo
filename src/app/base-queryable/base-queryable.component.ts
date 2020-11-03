@@ -25,7 +25,14 @@ export class BaseQueryableComponent {
 
   loading = true;
 
-  reloadItems$ = new BehaviorSubject(false);
+reloadItemsDefault = {
+    create: false,
+    update: false,
+    destroy: false,
+    item: null,
+  };
+
+  reloadItems$ = new BehaviorSubject(this.reloadItemsDefault);
 
   searchString$: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
@@ -52,7 +59,7 @@ export class BaseQueryableComponent {
     this.reloadItems$
   ]).pipe(
     tap(() => (this.loading = true)),
-    switchMap(([searchString, paginationOptions]) => {
+    switchMap(([searchString, paginationOptions, reloadItems]) => {
       return this.queryService.getItems(searchString, paginationOptions);
     }),
     map((res: { data: string[]; total: number }) => {
@@ -129,7 +136,7 @@ export class BaseQueryableComponent {
 
     this.queryService
       .update(this.paginationOptions$.value.offset + index, itemName)
-      .subscribe(() => this.reloadItems$.next(true));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, update: true, item}));
   }
 
   deleteItem(index) {
@@ -137,7 +144,7 @@ export class BaseQueryableComponent {
 
     this.queryService
       .remove(this.paginationOptions$.value.offset + index)
-      .subscribe(() => this.reloadItems$.next(true));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, destroy: true, item}));
   }
 
   addNew() {
@@ -150,7 +157,7 @@ export class BaseQueryableComponent {
 
     this.queryService
       .create(itemName)
-      .subscribe(() => this.reloadItems$.next(true));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, item}));
   }
   // #endregion
 }
