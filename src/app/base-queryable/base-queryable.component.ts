@@ -47,12 +47,12 @@ export class BaseQueryableComponent {
 
   requestItems$: Observable<any> = combineLatest([
     this.searchString$.pipe(
-      debounceTime(300),
+      debounceTime(600),
       map(searchString => searchString.trim()),
       distinctUntilChanged()
     ),
     this.paginationOptions$.pipe(
-      debounceTime(300),
+      debounceTime(600),
       distinctUntilKeyChanged("offset")
     ),
   ]).pipe(
