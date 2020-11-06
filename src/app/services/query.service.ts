@@ -17,12 +17,12 @@ export class QueryService {
       from(this.fakeApiService.create(itemName)).pipe(take(1));
 
     this.read = (searchString, paginationOptions) =>
-      from(this.fakeApiService.getItems(searchString, paginationOptions));
+      from(this.fakeApiService.read(searchString, paginationOptions));
 
     this.update = (item, itemName) =>
       from(this.fakeApiService.update(item, itemName)).pipe(take(1));
 
     this.destroy = index =>
-      from(this.fakeApiService.remove(index)).pipe(take(1));
+      from(this.fakeApiService.destroy(index)).pipe(take(1));
   }
 }

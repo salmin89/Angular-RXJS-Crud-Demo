@@ -107,7 +107,7 @@ export class FakeApiService {
     "Jason"
   ];
 
-  getItems(
+  read(
     searchString,
     { offset, limit }
   ): Promise<{ data: string[]; total: number }> {
@@ -150,7 +150,7 @@ export class FakeApiService {
     });
   }
 
-  remove(index): Promise<any> {
+  destroy(index): Promise<any> {
     console.log("FAKE API CALL -- DELETE ITEM");
 
     return new Promise(resolve => {
