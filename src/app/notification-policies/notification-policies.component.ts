@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { BaseQueryableComponent } from "../base-queryable/base-queryable.component";
-import { QueryService } from "../query.service";
+import { QueryService } from "../services/query.service";
 
 @Component({
   selector: "app-notification-policies",
@@ -8,7 +8,7 @@ import { QueryService } from "../query.service";
   styleUrls: ["./notification-policies.component.css"]
 })
 export class NotificationPoliciesComponent extends BaseQueryableComponent {
-  constructor() {
-    super();
+  constructor(private queryService: QueryService) {
+    super(queryService);
   }
 }

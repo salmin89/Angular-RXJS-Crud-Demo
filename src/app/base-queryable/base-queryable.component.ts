@@ -1,8 +1,5 @@
-import { Component, OnInit } from "@angular/core";
 import { BehaviorSubject, combineLatest, from, merge,  Observable, zip } from "rxjs";
-import { AnonymousSubject } from "rxjs/internal/Rx";
 import {
-  debounce,
   debounceTime,
   distinctUntilChanged,
   distinctUntilKeyChanged,
@@ -11,14 +8,11 @@ import {
   switchMap,
   tap
 } from "rxjs/operators";
-import { QueryService } from "../query.service";
 
-@Component({
-  selector: "app-base-queryable",
-  templateUrl: "./base-queryable.component.html"
-})
 export class BaseQueryableComponent {
-  private queryService = new QueryService();
+
+  apiService;
+
   DEFAULT_LIMIT = 10;
 
   loading = true;
@@ -58,7 +52,7 @@ export class BaseQueryableComponent {
   ]).pipe(
     tap(() => (this.loading = true)),
     switchMap(([searchString, paginationOptions]) => {
-      return this.queryService.getItems(searchString, paginationOptions)
+      return this.apiService.read(searchString, paginationOptions)
     }),
     shareReplay()
   );
@@ -95,8 +89,8 @@ export class BaseQueryableComponent {
     return this.getCurrentPage + 1 * this.DEFAULT_LIMIT < this.total$.value.all;
   }
 
-  ngOnInit() {
-    this.items$.subscribe(console.log)
+  constructor(_apiService) {
+    this.apiService = _apiService
   }
 
   handleSearch(event) {
@@ -148,7 +142,7 @@ export class BaseQueryableComponent {
     this.loading = true;
     this.pendingChanges = true;
 
-    this.queryService
+    this.apiService
       .update(this.paginationOptions$.value.offset + index, itemName)
       .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, update: true, itemIndex: index, itemName}));
   }
@@ -157,8 +151,8 @@ export class BaseQueryableComponent {
     this.loading = true;
     this.pendingChanges = true;
 
-    this.queryService
-      .remove(this.paginationOptions$.value.offset + index)
+    this.apiService
+      .destroy(this.paginationOptions$.value.offset + index)
       .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, destroy: true, itemIndex: index}));
   }
 
@@ -171,7 +165,7 @@ export class BaseQueryableComponent {
     this.loading = true;
     this.pendingChanges = true;
 
-    this.queryService
+    this.apiService
       .create(itemName)
       .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, itemName}));
   }
