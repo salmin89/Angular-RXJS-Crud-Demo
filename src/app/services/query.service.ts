@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { from } from "rxjs";
 import { take } from "rxjs/operators";
+import { CrudInterface } from "./crud";
 import { FakeApiService } from "./fake-api.service";
 
 @Injectable({
   providedIn: "root"
 })
-export class QueryService {
+export class QueryService implements CrudInterface {
   public create;
   public read;
   public update;

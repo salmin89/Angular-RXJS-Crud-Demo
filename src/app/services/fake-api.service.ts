@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
+import { CrudInterface } from "./crud";
 
 @Injectable({
   providedIn: "root"
 })
-export class FakeApiService {
+export class FakeApiService implements CrudInterface {
   names = [
     "Liam",
     "Noah",
@@ -107,6 +108,17 @@ export class FakeApiService {
     "Jason"
   ];
 
+  create(item): Promise<string> {
+    console.log("FAKE API CALL -- CREATE ITEM");
+
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.names.unshift(item);
+        resolve(item);
+      }, 800);
+    });
+  }
+
   read(
     searchString,
     { offset, limit }
@@ -128,18 +140,7 @@ export class FakeApiService {
     });
   }
 
-  create(item): Promise<any> {
-    console.log("FAKE API CALL -- CREATE ITEM");
-
-    return new Promise(resolve => {
-      setTimeout(() => {
-        this.names.unshift(item);
-        resolve(item);
-      }, 800);
-    });
-  }
-
-  update(index, itemName): Promise<any> {
+  update(index, itemName): Promise<string> {
     console.log("FAKE API CALL -- UPDATE ITEM");
 
     return new Promise(resolve => {
@@ -150,7 +151,7 @@ export class FakeApiService {
     });
   }
 
-  destroy(index): Promise<any> {
+  destroy(index): Promise<string> {
     console.log("FAKE API CALL -- DELETE ITEM");
 
     return new Promise(resolve => {

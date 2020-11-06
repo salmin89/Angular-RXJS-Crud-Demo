@@ -8,10 +8,11 @@ import {
   switchMap,
   tap
 } from "rxjs/operators";
+import { CrudInterface } from "../services/crud";
 
 export class BaseQueryableComponent {
 
-  apiService;
+  apiService: CrudInterface;
 
   DEFAULT_LIMIT = 10;
 
@@ -89,7 +90,7 @@ export class BaseQueryableComponent {
     return this.getCurrentPage + 1 * this.DEFAULT_LIMIT < this.total$.value.all;
   }
 
-  constructor(_apiService) {
+  constructor(_apiService: CrudInterface) {
     this.apiService = _apiService
   }
 
