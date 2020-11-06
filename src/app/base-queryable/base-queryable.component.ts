@@ -65,23 +65,26 @@ export class BaseQueryableComponent {
 
   items$ = combineLatest(this.requestItems$, this.reloadItems$).pipe(
     map(([response,reloadItems]) => {
-      if (reloadItems.itemIndex !== null) {
-        if (reloadItems.destroy) response.data.splice(reloadItems.itemIndex, 1);
+      if (this.pendingChanges && (reloadItems.create || reloadItems.update || reloadItems.destroy)) {
+        
+        if (reloadItems.create) response.data.unshift(reloadItems.itemName);
         if (reloadItems.update) response.data[reloadItems.itemIndex] = reloadItems.itemName;
-        this.reloadItems$.next(this.reloadItemsDefault);
+        if (reloadItems.destroy) response.data.splice(reloadItems.itemIndex, 1);
+
+        this.pendingChanges = false;
       }
       this.total$.next({
         current: response.data.length,
         all: response.total
       });
       this.loading = false;
-
       return response.data;
     }),
     shareReplay()
   )
 
   selectedItem: any;
+  pendingChanges: boolean;
 
   // #region State Changes
   get getCurrentPage() {
@@ -90,6 +93,10 @@ export class BaseQueryableComponent {
 
   get hasNextPage() {
     return this.getCurrentPage + 1 * this.DEFAULT_LIMIT < this.total$.value.all;
+  }
+
+  ngOnInit() {
+    this.items$.subscribe(console.log)
   }
 
   handleSearch(event) {
@@ -139,6 +146,7 @@ export class BaseQueryableComponent {
       return;
     }
     this.loading = true;
+    this.pendingChanges = true;
 
     this.queryService
       .update(this.paginationOptions$.value.offset + index, itemName)
@@ -147,6 +155,7 @@ export class BaseQueryableComponent {
 
   deleteItem(index) {
     this.loading = true;
+    this.pendingChanges = true;
 
     this.queryService
       .remove(this.paginationOptions$.value.offset + index)
@@ -154,16 +163,17 @@ export class BaseQueryableComponent {
   }
 
   addNew() {
-    this.loading = true;
     const itemName = prompt("Enter item name");
+
     if (itemName === null) {
-      this.loading = true;
       return;
     }
+    this.loading = true;
+    this.pendingChanges = true;
 
     this.queryService
       .create(itemName)
-      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, itemIndex: 0}));
+      .subscribe((item) => this.reloadItems$.next({...this.reloadItemsDefault, create: true, itemName}));
   }
   // #endregion
 }
